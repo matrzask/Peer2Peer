@@ -11,7 +11,7 @@ public enum HashAlgorithmType
 
 class Hasher
 {
-    private string targetHash;
+    private readonly string targetHash;
     private HashAlgorithmType algorithmType;
 
     public Hasher(string targetHash, HashAlgorithmType algorithmType)
