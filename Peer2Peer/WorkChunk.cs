@@ -1,13 +1,25 @@
 class WorkChunk
 {
-    public string Start { get; set; }
-    public string End { get; set; }
+    public long Start { get; set; }
+    public long End { get; set; }
+    public int Length { get; set; }
     public char[] CharacterSet { get; set; }
 
     public WorkChunk(string start, string end, char[] characterSet)
     {
+        if (start.Length != end.Length)
+            throw new ArgumentException("Start and end must have the same length.");
+        Length = start.Length;
+        CharacterSet = characterSet;
+        Start = ToNumber(start);
+        End = ToNumber(end);
+    }
+
+    public WorkChunk(long start, long end, char[] characterSet, int passwordLength)
+    {
         Start = start;
         End = end;
+        Length = passwordLength;
         CharacterSet = characterSet;
     }
 
@@ -41,12 +53,12 @@ class WorkChunk
     //example: start = "aa", end = "ba", characterSet = "abc".ToCharArray(), result: "aa", "ab", "ac", "ba"
     public IEnumerable<string> GeneratePasswords()
     {
-        long start = ToNumber(Start);
-        long end = ToNumber(End);
+        long start = Start;
+        long end = End;
 
         for (long i = start; i <= end; i++)
         {
-            yield return ToString(i, Start.Length);
+            yield return ToString(i, Length);
         }
     }
 }
