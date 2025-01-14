@@ -5,6 +5,9 @@ class WorkChunk
     public int Length { get; set; }
     public char[] CharacterSet { get; set; }
 
+    // Parameterless constructor for deserialization
+    public WorkChunk() { }
+
     public WorkChunk(string start, string end, char[] characterSet)
     {
         if (start.Length != end.Length)

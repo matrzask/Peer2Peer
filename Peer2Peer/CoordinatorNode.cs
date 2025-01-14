@@ -1,3 +1,5 @@
+using System.Text.Json;
+
 class CoordinatorNode : Node
 {
     private readonly int _chunkSize;
@@ -5,6 +7,7 @@ class CoordinatorNode : Node
     private int _curPasswordLength;
     private readonly char[] _charset;
     private readonly Queue<WorkChunk> _workChunks = new Queue<WorkChunk>();
+    private bool passwordFound = false;
 
     public CoordinatorNode(int chunkSize, char[] charset, int minPasswordLength = 1, int maxPasswordLength = 20)
     {
@@ -16,7 +19,7 @@ class CoordinatorNode : Node
 
     public void AssignChunk(WorkerNode node, WorkChunk chunk)
     {
-        node.StartWork(chunk);
+        SendMessenge(new Message(this, JsonSerializer.Serialize(chunk), MessageType.AssignWork), node);
     }
 
     public void HandleWorkerNode(WorkerNode node)
@@ -46,5 +49,39 @@ class CoordinatorNode : Node
         }
 
         _curPasswordLength++;
+    }
+
+    public override void ReceiveMessage(Message message)
+    {
+        switch (message.Type)
+        {
+            case MessageType.PasswordFound:
+                Console.WriteLine($"CoordinatorNode received password found message: {message.Payload}");
+                passwordFound = true;
+                break;
+
+            case MessageType.WorkCompleted:
+                WorkChunk chunk = JsonSerializer.Deserialize<WorkChunk>(message.Payload);
+                if (chunk != null)
+                {
+                    // Add to completed
+                }
+                else
+                {
+                    Console.WriteLine("Failed to deserialize WorkChunk from message payload.");
+                }
+                break;
+
+            case MessageType.RequestWork:
+                if (!passwordFound)
+                {
+                    HandleWorkerNode((WorkerNode)message.Sender);
+                }
+                break;
+
+            default:
+                Console.WriteLine("Unknown message type received.");
+                break;
+        }
     }
 }
