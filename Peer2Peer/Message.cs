@@ -1,25 +1,38 @@
-using Microsoft.AspNetCore.SignalR;
+using System.Text.Json;
 
-internal class Message
+public enum MessageType
 {
-    public string SenderId { get; set; }
-    public string ReceiverId { get; set; }
+    WorkCompleted,
+    RequestWork,
+    AssignWork,
+    PasswordFound
+}
+
+public class Message
+{
+    public Node Sender { get; set; }
     public string Payload { get; set; }
+    public MessageType Type { get; set; }
 
-    public Message(string senderId, string receiverId, string payload)
+    public Message(Node sender, string payload, MessageType type)
     {
-        SenderId = senderId;
-        ReceiverId = receiverId;
+        Sender = sender;
         Payload = payload;
+        Type = type;
     }
 
-    public void Serialize()
+    public string Serialize()
     {
-        throw new NotImplementedException();
+        return JsonSerializer.Serialize(this);
     }
 
-    public static Message Deserialize()
+    public static Message Deserialize(string json)
     {
-        throw new NotImplementedException();
+        var message = JsonSerializer.Deserialize<Message>(json);
+        if (message == null)
+        {
+            throw new InvalidOperationException("Deserialization resulted in a null Message object.");
+        }
+        return message;
     }
 }

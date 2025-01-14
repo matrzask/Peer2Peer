@@ -1,14 +1,12 @@
-class Node
+public class Node
 {
     readonly string nodeId;
 
-    void SendMessenge(Message message)
+    protected void SendMessenge(Message message, Node node)
     {
-        throw new NotImplementedException();
+        node.ReceiveMessage(message);
     }
 
-    void ReceiveMessage(Message message)
-    {
-        throw new NotImplementedException();
-    }
+
+    public virtual void ReceiveMessage(Message message) { }
 }
