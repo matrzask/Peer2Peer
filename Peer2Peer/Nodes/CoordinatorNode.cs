@@ -11,6 +11,7 @@ namespace Peer2Peer.Nodes
         private int _curPasswordLength;
         private readonly char[] _charset;
         private readonly Queue<WorkChunk> _workChunks = new Queue<WorkChunk>();
+        private readonly Dictionary<string, WorkChunk> _assignedChunks = new Dictionary<string, WorkChunk>();
         private bool passwordFound = false;
 
         public CoordinatorNode(int chunkSize, char[] charset, int minPasswordLength = 1, int maxPasswordLength = 20)
@@ -24,6 +25,7 @@ namespace Peer2Peer.Nodes
         public void AssignChunk(WorkerNode node, WorkChunk chunk)
         {
             Message message = new AssignWorkMessage(this, JsonSerializer.Serialize(chunk));
+            _assignedChunks.Add(node.nodeId, chunk);
             SendMessage(message, node);
         }
 
@@ -60,11 +62,11 @@ namespace Peer2Peer.Nodes
             _curPasswordLength++;
         }
 
-        public void WorkCompleted(WorkChunk chunk)
+        public void WorkCompleted(WorkChunk chunk, string workerId)
         {
             if (chunk != null)
             {
-                // Add to completed
+                _assignedChunks.Remove(workerId);
             }
             else
             {
@@ -77,39 +79,5 @@ namespace Peer2Peer.Nodes
             Console.WriteLine($"CoordinatorNode received password found message: {password}");
             passwordFound = true;
         }
-
-        /*public override void ReceiveMessage(Message message)
-        {
-            switch (message.Type)
-            {
-                case MessageType.PasswordFound:
-                    Console.WriteLine($"CoordinatorNode received password found message: {message.Payload}");
-                    passwordFound = true;
-                    break;
-
-                case MessageType.WorkCompleted:
-                    WorkChunk chunk = JsonSerializer.Deserialize<WorkChunk>(message.Payload);
-                    if (chunk != null)
-                    {
-                        // Add to completed
-                    }
-                    else
-                    {
-                        Console.WriteLine("Failed to deserialize WorkChunk from message payload.");
-                    }
-                    break;
-
-                case MessageType.RequestWork:
-                    if (!passwordFound)
-                    {
-                        HandleWorkerNode((WorkerNode)message.Sender);
-                    }
-                    break;
-
-                default:
-                    Console.WriteLine("Unknown message type received.");
-                    break;
-            }
-        }*/
     }
 }

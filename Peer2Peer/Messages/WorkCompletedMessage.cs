@@ -14,7 +14,7 @@ namespace Peer2Peer.Messages
             if (node is CoordinatorNode coordinator)
             {
                 WorkChunk chunk = JsonSerializer.Deserialize<WorkChunk>(Payload);
-                coordinator.WorkCompleted(chunk);
+                coordinator.WorkCompleted(chunk, Sender.nodeId);
             }
         }
     }
