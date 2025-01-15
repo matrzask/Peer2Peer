@@ -5,6 +5,8 @@ app.MapGet("/", () => "Hello World!");
 
 app.Run();*/
 
+using Peer2Peer.Nodes;
+
 class Program
 {
     static void Main()
