@@ -62,15 +62,16 @@ namespace Peer2Peer.Nodes
             _curPasswordLength++;
         }
 
-        public void WorkCompleted(WorkChunk chunk, string workerId)
+        public override void WorkCompleted(WorkChunk chunk, string workerId)
         {
-            if (chunk != null)
+            base.WorkCompleted(chunk, workerId);
+            if (_assignedChunks.ContainsKey(workerId) && _assignedChunks[workerId].Start == chunk.Start && _assignedChunks[workerId].Length == chunk.Length)
             {
                 _assignedChunks.Remove(workerId);
             }
             else
             {
-                Console.WriteLine("Failed to deserialize WorkChunk from message payload.");
+                Console.WriteLine("Worker node completed work on an unassigned chunk.");
             }
         }
 
