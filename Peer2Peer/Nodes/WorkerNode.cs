@@ -35,7 +35,8 @@ namespace Peer2Peer.Nodes
             }
             stopwatch.Stop();
             Console.WriteLine($"WorkerNode {nodeId} completed work chunk in {stopwatch.ElapsedMilliseconds} ms");
-            SendMessage(new WorkCompletedMessage(this, JsonSerializer.Serialize(chunk)), coordinator);
+            WorkCompleted(chunk, nodeId);
+            SendMessage(new WorkCompletedMessage(this, JsonSerializer.Serialize(chunk)), coordinator); //Should broadcast to all nodes
             SendMessage(new RequestWorkMessage(this, ""), coordinator);
             return;
         }

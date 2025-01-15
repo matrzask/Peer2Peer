@@ -11,10 +11,10 @@ namespace Peer2Peer.Messages
         }
         public override void Execute(Node node)
         {
-            if (node is CoordinatorNode coordinator)
+            WorkChunk chunk = JsonSerializer.Deserialize<WorkChunk>(Payload);
+            if (chunk != null)
             {
-                WorkChunk chunk = JsonSerializer.Deserialize<WorkChunk>(Payload);
-                coordinator.WorkCompleted(chunk);
+                node.WorkCompleted(chunk, Sender.nodeId);
             }
         }
     }

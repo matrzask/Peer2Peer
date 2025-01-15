@@ -1,6 +1,6 @@
 namespace Peer2Peer.Helpers
 {
-    class WorkChunk
+    public class WorkChunk
     {
         public long Start { get; set; }
         public long End { get; set; }
