@@ -5,8 +5,6 @@ namespace Peer2Peer.Nodes
 {
     class WorkerNode : Node
     {
-        private Hasher hasher;
-
         private readonly int _chunkSize;
         private readonly int _maxPasswordLength;
         private int _curPasswordLength;
@@ -18,9 +16,8 @@ namespace Peer2Peer.Nodes
         private volatile bool interrupt = false;
 
 
-        public WorkerNode(Hasher hasher, string ip, char[] charset, int chunkSize = 10000000, int minPasswordLength = 1, int maxPasswordLength = 20)
+        public WorkerNode(string ip, char[] charset, int chunkSize = 10000000, int minPasswordLength = 1, int maxPasswordLength = 20)
         {
-            this.hasher = hasher;
             NodeId = Guid.NewGuid().ToString();
             ListeningPort = new Random().Next(5001, 6000);
             Ip = ip;
@@ -33,8 +30,17 @@ namespace Peer2Peer.Nodes
             peerConnection.startConnection();
         }
 
+        public void SetHasher(Hasher hasher)
+        {
+            this.hasher = hasher;
+        }
+
         public void Start()
         {
+            while (hasher == null)
+            {
+                Thread.Sleep(100);
+            }
             while (!passwordFound)
             {
                 StartWork(GetChunk());
@@ -113,6 +119,7 @@ namespace Peer2Peer.Nodes
             {
                 throw new InvalidOperationException("No more work to be done.");
             }
+            Console.WriteLine($"Generating work chunks for password length {_curPasswordLength}");
 
             long maxPass = (long)Math.Pow(_charset.Length, _curPasswordLength) - 1;
 

@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json.Serialization;
 
 namespace Peer2Peer.Helpers
 {
@@ -11,21 +12,23 @@ namespace Peer2Peer.Helpers
         SHA512
     }
 
-    class Hasher
+    public class Hasher
     {
-        private readonly string targetHash;
-        private HashAlgorithmType algorithmType;
+        public string TargetHash { get; private set; }
+        public HashAlgorithmType AlgorithmType { get; private set; }
 
+
+        [JsonConstructor]
         public Hasher(string targetHash, HashAlgorithmType algorithmType)
         {
-            this.targetHash = targetHash;
-            this.algorithmType = algorithmType;
+            TargetHash = targetHash;
+            AlgorithmType = algorithmType;
         }
 
         public bool Compare(string input)
         {
             string inputHash = ComputeHash(input);
-            return string.Equals(inputHash, targetHash, StringComparison.OrdinalIgnoreCase);
+            return string.Equals(inputHash, TargetHash, StringComparison.OrdinalIgnoreCase);
         }
 
         public string ComputeHash(string input)
@@ -43,13 +46,13 @@ namespace Peer2Peer.Helpers
 
         private HashAlgorithm CreateHashAlgorithm()
         {
-            return algorithmType switch
+            return AlgorithmType switch
             {
                 HashAlgorithmType.MD5 => MD5.Create(),
                 HashAlgorithmType.SHA1 => SHA1.Create(),
                 HashAlgorithmType.SHA256 => SHA256.Create(),
                 HashAlgorithmType.SHA512 => SHA512.Create(),
-                _ => throw new NotSupportedException($"Unsupported hash algorithm: {algorithmType}")
+                _ => throw new NotSupportedException($"Unsupported hash algorithm: {AlgorithmType}")
             };
         }
     }

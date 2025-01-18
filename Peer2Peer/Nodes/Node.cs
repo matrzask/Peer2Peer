@@ -1,5 +1,6 @@
 using System.Net.Sockets;
 using System.Text.Json;
+using Peer2Peer.Helpers;
 using Peer2Peer.Messages;
 using Peer2Peer.Network;
 
@@ -15,6 +16,7 @@ namespace Peer2Peer.Nodes
         protected readonly object _ChunksLock = new object();
         protected readonly object _NodesLock = new object();
         protected PeerConnection peerConnection;
+        protected Hasher? hasher;
 
 
         public Node() { }
@@ -23,7 +25,6 @@ namespace Peer2Peer.Nodes
         {
             try
             {
-
                 peerConnection.SendMessageToNode(node, message);
             }
             catch (SocketException)
@@ -35,10 +36,11 @@ namespace Peer2Peer.Nodes
             }
         }
 
-        public void SendNodeRegistry(Node node)
+        public void SendInfo(Node node)
         {
             SendMessage(new NodeRegistryMessage(this, JsonSerializer.Serialize(nodes)), node);
             SendMessage(new CompletedChunksMessage(this, JsonSerializer.Serialize(_completedChunks)), node);
+            SendMessage(new SetHasherMessage(this, JsonSerializer.Serialize(hasher)), node);
         }
 
         public void SetNodeRegistry(List<Node> nodes)
