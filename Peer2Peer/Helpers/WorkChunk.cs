@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
+using Peer2Peer.Password;
 
 namespace Peer2Peer.Helpers
 {
@@ -59,15 +60,19 @@ namespace Peer2Peer.Helpers
         }
 
         //example: start = "aa", end = "ba", characterSet = "abc".ToCharArray(), result: "aa", "ab", "ac", "ba"
-        public IEnumerable<string> GeneratePasswords()
+        public PasswordCollection GeneratePasswords()
         {
             long start = Start;
             long end = End;
 
+            var collection = new PasswordCollection();
+
             for (long i = start; i <= end; i++)
             {
-                yield return ToString(i, Length);
+                collection.AddItem(ToString(i, Length));
             }
+
+            return collection;
         }
 
         public string Hash()

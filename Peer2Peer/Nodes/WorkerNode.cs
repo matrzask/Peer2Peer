@@ -1,6 +1,7 @@
 using Peer2Peer.Helpers;
 using Peer2Peer.Messages;
 using Peer2Peer.Network;
+using Peer2Peer.Password;
 namespace Peer2Peer.Nodes
 {
     class WorkerNode : Node
@@ -69,7 +70,8 @@ namespace Peer2Peer.Nodes
                 _assignedChunks.Add(chunk.Hash(), this);
             }
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
-            foreach (string input in chunk.GeneratePasswords())
+            var collection = chunk.GeneratePasswords();
+            foreach (string input in collection)
             {
                 if (hasher.Compare(input))
                 {
