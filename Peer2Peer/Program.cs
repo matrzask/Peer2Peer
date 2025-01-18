@@ -12,8 +12,36 @@ using Peer2Peer.Nodes;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        var builder = WebApplication.CreateBuilder(args);
+
+        int webAppPort = 5000;
+        while (!IsPortAvailable(webAppPort))
+        {
+            webAppPort++;
+        }
+
+        builder.WebHost.UseUrls($"http://localhost:{webAppPort}");
+
+        var app = builder.Build();
+
+        app.MapGet("/", () =>
+        {
+            var progress = "";
+            for (int i = 0; i < ProgressStatus.TotalChunks.Count; i++)
+            {
+                progress += $"Password length {i + 1}: {ProgressStatus.CompletedChunks[i]}/{ProgressStatus.TotalChunks[i]}\n";
+            }
+            if (ProgressStatus.FoundPassword != null)
+            {
+                progress += "Password found: " + ProgressStatus.FoundPassword;
+            }
+            return progress;
+        });
+
+        app.RunAsync();
+
         var charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".ToCharArray();
         string targetHash = "e604fb2072c286d1fb6378c5cde74ca0c99f3ba1d9f4cef58969020efbc2382e"; //Pass1
         HashAlgorithmType algorithmType = HashAlgorithmType.SHA256;
@@ -56,5 +84,20 @@ class Program
             }
         }
         throw new Exception("No network adapters with an IPv4 address in the system!");
+    }
+
+    static bool IsPortAvailable(int port)
+    {
+        try
+        {
+            TcpListener listener = new TcpListener(IPAddress.Loopback, port);
+            listener.Start();
+            listener.Stop();
+            return true;
+        }
+        catch (SocketException)
+        {
+            return false;
+        }
     }
 }

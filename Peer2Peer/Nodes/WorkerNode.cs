@@ -44,6 +44,7 @@ namespace Peer2Peer.Nodes
             while (!passwordFound)
             {
                 StartWork(GetChunk());
+                ProgressStatus.CompletedChunks[ProgressStatus.CompletedChunks.Count - 1] = ProgressStatus.TotalChunks[ProgressStatus.CompletedChunks.Count - 1] - _workChunks.Count;
             }
         }
 
@@ -74,6 +75,7 @@ namespace Peer2Peer.Nodes
                 {
                     stopwatch.Stop();
                     Console.WriteLine($"WorkerNode {NodeId} found the correct input: {input}");
+                    ProgressStatus.FoundPassword = input;
                     lock (_NodesLock)
                     {
                         nodesCopy = new List<Node>(nodes);
@@ -128,6 +130,13 @@ namespace Peer2Peer.Nodes
                 long chunkEnd = Math.Min(i + _chunkSize - 1, maxPass);
                 _workChunks.Enqueue(new WorkChunk(i, chunkEnd, _charset, _curPasswordLength));
             }
+            if (ProgressStatus.CompletedChunks.Count > 0)
+            {
+                ProgressStatus.CompletedChunks[ProgressStatus.CompletedChunks.Count - 1] = ProgressStatus.TotalChunks[ProgressStatus.CompletedChunks.Count - 1];
+            }
+
+            ProgressStatus.TotalChunks.Add(_workChunks.Count);
+            ProgressStatus.CompletedChunks.Add(0);
 
             _curPasswordLength++;
         }
@@ -173,6 +182,7 @@ namespace Peer2Peer.Nodes
         {
             Console.WriteLine($"Received password found message: {password}");
             passwordFound = true;
+            ProgressStatus.FoundPassword = password;
         }
 
         public void WorkCompleted(string chunkHash)
