@@ -10,9 +10,9 @@ namespace Peer2Peer.Messages
         }
         public override void Execute(Node node)
         {
-            if (node is CoordinatorNode coordinator)
+            if (node is WorkerNode worker)
             {
-                coordinator.PasswordFound(Payload);
+                worker.PasswordFound(Payload);
             }
         }
     }

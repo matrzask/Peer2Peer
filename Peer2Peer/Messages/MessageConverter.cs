@@ -1,3 +1,4 @@
+using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -15,13 +16,12 @@ namespace Peer2Peer.Messages
 
                 return type switch
                 {
-                    nameof(AssignWorkMessage) => JsonSerializer.Deserialize<AssignWorkMessage>(json, options),
+                    nameof(ClaimChunkMessage) => JsonSerializer.Deserialize<ClaimChunkMessage>(json, options),
+                    nameof(CompletedChunksMessage) => JsonSerializer.Deserialize<CompletedChunksMessage>(json, options),
                     nameof(ConnectMessage) => JsonSerializer.Deserialize<ConnectMessage>(json, options),
                     nameof(NewNodeMessage) => JsonSerializer.Deserialize<NewNodeMessage>(json, options),
                     nameof(NodeRegistryMessage) => JsonSerializer.Deserialize<NodeRegistryMessage>(json, options),
                     nameof(PasswordFoundMessage) => JsonSerializer.Deserialize<PasswordFoundMessage>(json, options),
-                    nameof(RequestWorkMessage) => JsonSerializer.Deserialize<RequestWorkMessage>(json, options),
-                    nameof(SetCoordinatorMessage) => JsonSerializer.Deserialize<SetCoordinatorMessage>(json, options),
                     nameof(WorkCompletedMessage) => JsonSerializer.Deserialize<WorkCompletedMessage>(json, options),
                     _ => throw new NotSupportedException($"Message type '{type}' is not supported")
                 };

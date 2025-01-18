@@ -1,3 +1,6 @@
+using System.Security.Cryptography;
+using System.Text;
+
 namespace Peer2Peer.Helpers
 {
     public class WorkChunk
@@ -64,6 +67,16 @@ namespace Peer2Peer.Helpers
             for (long i = start; i <= end; i++)
             {
                 yield return ToString(i, Length);
+            }
+        }
+
+        public string Hash()
+        {
+            using (SHA256 sha256 = SHA256.Create())
+            {
+                string input = $"{Start}:{End}:{Length}";
+                byte[] hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(input));
+                return BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant();
             }
         }
     }
