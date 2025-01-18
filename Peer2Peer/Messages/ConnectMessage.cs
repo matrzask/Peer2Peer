@@ -9,7 +9,7 @@ namespace Peer2Peer.Messages
         }
         public override void Execute(Node node)
         {
-            node.SendNodeRegistry(Sender);
+            node.SendInfo(Sender);
         }
     }
 }

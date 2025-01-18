@@ -23,6 +23,7 @@ namespace Peer2Peer.Messages
                     nameof(NodeRegistryMessage) => JsonSerializer.Deserialize<NodeRegistryMessage>(json, options),
                     nameof(PasswordFoundMessage) => JsonSerializer.Deserialize<PasswordFoundMessage>(json, options),
                     nameof(WorkCompletedMessage) => JsonSerializer.Deserialize<WorkCompletedMessage>(json, options),
+                    nameof(SetHasherMessage) => JsonSerializer.Deserialize<SetHasherMessage>(json, options),
                     _ => throw new NotSupportedException($"Message type '{type}' is not supported")
                 };
             }
