@@ -8,11 +8,13 @@ namespace Peer2Peer.Nodes
         private Hasher hasher;
         private Node coordinator;
 
-        public WorkerNode(Hasher hasher, Node coordinator)
+        public WorkerNode(Hasher hasher, Node coordinator, string ip)
         {
             this.hasher = hasher;
             this.coordinator = coordinator;
             nodeId = Guid.NewGuid().ToString();
+            ListenigPort = new Random().Next(5001, 6000);
+            Ip = ip;
         }
 
         public void Start()

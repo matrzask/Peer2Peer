@@ -6,6 +6,8 @@ namespace Peer2Peer.Nodes
     public abstract class Node
     {
         public string nodeId;
+        public int ListenigPort { get; set; }
+        public string Ip { get; set; }
         private readonly HashSet<string> _completedChunks = new HashSet<string>();
 
 
