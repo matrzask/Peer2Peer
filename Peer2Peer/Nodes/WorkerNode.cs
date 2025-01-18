@@ -44,13 +44,19 @@ namespace Peer2Peer.Nodes
         public void StartWork(WorkChunk chunk)
         {
             _currentChunkHash = chunk.Hash();
-            foreach (Node node in nodes)
+            List<Node> nodesCopy;
+            lock (_NodesLock)
+            {
+                nodesCopy = new List<Node>(nodes);
+            }
+            foreach (Node node in nodesCopy)
             {
                 if (node.NodeId != NodeId)
                 {
                     SendMessage(new ClaimChunkMessage(this, _currentChunkHash), node);
                 }
             }
+
             lock (_ChunksLock)
             {
                 _assignedChunks.Add(chunk.Hash(), this);
@@ -62,13 +68,18 @@ namespace Peer2Peer.Nodes
                 {
                     stopwatch.Stop();
                     Console.WriteLine($"WorkerNode {NodeId} found the correct input: {input}");
-                    foreach (Node node in nodes)
+                    lock (_NodesLock)
+                    {
+                        nodesCopy = new List<Node>(nodes);
+                    }
+                    foreach (Node node in nodesCopy)
                     {
                         if (node.NodeId != NodeId)
                         {
                             SendMessage(new PasswordFoundMessage(this, input), node);
                         }
                     }
+
                     passwordFound = true;
                     return;
                 }
@@ -81,13 +92,18 @@ namespace Peer2Peer.Nodes
             stopwatch.Stop();
             Console.WriteLine($"WorkerNode {NodeId} completed work chunk {chunk.Hash()} in {stopwatch.ElapsedMilliseconds} ms");
             WorkCompleted(chunk.Hash());
-            foreach (Node node in nodes)
+            lock (_NodesLock)
+            {
+                nodesCopy = new List<Node>(nodes);
+            }
+            foreach (Node node in nodesCopy)
             {
                 if (node.NodeId != NodeId)
                 {
                     SendMessage(new WorkCompletedMessage(this, chunk.Hash()), node);
                 }
             }
+
             return;
         }
 
@@ -116,7 +132,6 @@ namespace Peer2Peer.Nodes
                 GenerateWorkChunks();
             }
             WorkChunk chunk = _workChunks.Dequeue();
-            string chunkHash = chunk.Hash();
             lock (_ChunksLock)
             {
                 while (_completedChunks.Contains(chunk.Hash()) || _assignedChunks.ContainsKey(chunk.Hash()))
@@ -137,7 +152,8 @@ namespace Peer2Peer.Nodes
             {
                 lock (_ChunksLock)
                 {
-                    _assignedChunks.Add(chunkHash, sender);
+                    if (!_assignedChunks.ContainsKey(chunkHash))
+                        _assignedChunks.Add(chunkHash, sender);
                 }
             }
             else
