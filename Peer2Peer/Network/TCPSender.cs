@@ -19,18 +19,18 @@ namespace Peer2Peer.Network
         {
             try
             {
-                using (TcpClient client = new TcpClient(node.Ip, node.ListenigPort))
+                using (TcpClient client = new TcpClient(node.Ip, node.ListeningPort))
                 using (NetworkStream stream = client.GetStream())
                 {
                     string serializedMessage = message.Serialize();
                     byte[] data = Encoding.UTF8.GetBytes(serializedMessage);
                     stream.Write(data, 0, data.Length);
-                    Console.WriteLine($"Message sent to {node.Ip}:{node.ListenigPort}");
+                    Console.WriteLine($"{message.Type} sent to {node.Ip}:{node.ListeningPort}");
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error sending message: {ex.Message}");
+                Console.WriteLine($"Error sending {message.Type}: {ex.Message}");
             }
         }
     }

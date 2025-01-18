@@ -11,7 +11,7 @@ namespace Peer2Peer.Messages
         {
             if (node is CoordinatorNode coordinator)
             {
-                coordinator.HandleWorkerNode(Sender as WorkerNode);
+                coordinator.HandleWorkerNode(Sender);
             }
         }
     }
