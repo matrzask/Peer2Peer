@@ -1,9 +1,6 @@
-using System;
-using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using System.Threading.Tasks;
 using Peer2Peer.Messages;
 using Peer2Peer.Nodes;
 
@@ -20,17 +17,18 @@ namespace Peer2Peer.Network
         public TCPListener(Node myNode)
         {
             _myNode = myNode;
+            OnMessageReceived += (message) => message.Execute(_myNode);
         }
 
         public void StartListening()
         {
             try
             {
-                _listener = new TcpListener(IPAddress.Any, _myNode.ListenigPort);
+                _listener = new TcpListener(IPAddress.Any, _myNode.ListeningPort);
                 _listener.Start();
                 _isListening = true;
 
-                Console.WriteLine($"Listening on port {_myNode.ListenigPort}...");
+                Console.WriteLine($"Listening on port {_myNode.ListeningPort}...");
 
                 Task.Run(() => ListenLoop());
             }
@@ -75,7 +73,7 @@ namespace Peer2Peer.Network
                 {
                     string messageJson = reader.ReadToEnd();
                     var message = Message.Deserialize(messageJson);
-                    Console.WriteLine($"Received message from {message.Sender.nodeId}: {message.Payload}");
+                    Console.WriteLine($"Received {message.Type} from {message.Sender.NodeId}: {message.Payload}");
 
                     OnMessageReceived?.Invoke(message);
                 }

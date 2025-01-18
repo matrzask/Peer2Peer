@@ -1,27 +1,22 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Peer2Peer.Nodes;
 namespace Peer2Peer.Messages
 {
-    /*public enum MessageType
-    {
-        WorkCompleted,
-        RequestWork,
-        AssignWork,
-        PasswordFound
-    }*/
 
+    [JsonConverter(typeof(MessageConverter))]
     public abstract class Message
     {
+        public string Type => GetType().Name;
         public Node Sender { get; set; }
         public string Payload { get; set; }
 
+        [JsonConstructor]
         public Message(Node sender, string payload)
         {
             Sender = sender;
             Payload = payload;
         }
-
-        public Message() { }
 
         public string Serialize()
         {

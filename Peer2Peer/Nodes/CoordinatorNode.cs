@@ -14,22 +14,27 @@ namespace Peer2Peer.Nodes
         private readonly Dictionary<string, WorkChunk> _assignedChunks = new Dictionary<string, WorkChunk>();
         private bool passwordFound = false;
 
-        public CoordinatorNode(int chunkSize, char[] charset, int minPasswordLength = 1, int maxPasswordLength = 20)
+        public CoordinatorNode(int chunkSize, char[] charset, string ip, int minPasswordLength = 1, int maxPasswordLength = 20)
         {
             _chunkSize = chunkSize;
             _charset = charset;
             _curPasswordLength = minPasswordLength;
             _maxPasswordLength = maxPasswordLength;
+            Ip = ip;
+            ListeningPort = new Random().Next(5001, 6000);
+            NodeId = Guid.NewGuid().ToString();
+            coordinator = this;
+            nodes.Add(this);
         }
 
-        public void AssignChunk(WorkerNode node, WorkChunk chunk)
+        public void AssignChunk(Node node, WorkChunk chunk)
         {
             Message message = new AssignWorkMessage(this, JsonSerializer.Serialize(chunk));
-            _assignedChunks.Add(node.nodeId, chunk);
+            _assignedChunks.Add(node.NodeId, chunk);
             SendMessage(message, node);
         }
 
-        public void HandleWorkerNode(WorkerNode node)
+        public void HandleWorkerNode(Node node)
         {
             if (passwordFound)
             {

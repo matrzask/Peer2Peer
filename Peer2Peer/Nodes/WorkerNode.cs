@@ -6,15 +6,14 @@ namespace Peer2Peer.Nodes
     class WorkerNode : Node
     {
         private Hasher hasher;
-        private Node coordinator;
 
-        public WorkerNode(Hasher hasher, Node coordinator, string ip)
+        public WorkerNode(Hasher hasher, string ip)
         {
             this.hasher = hasher;
-            this.coordinator = coordinator;
-            nodeId = Guid.NewGuid().ToString();
-            ListenigPort = new Random().Next(5001, 6000);
+            NodeId = Guid.NewGuid().ToString();
+            ListeningPort = new Random().Next(5001, 6000);
             Ip = ip;
+            nodes.Add(this);
         }
 
         public void Start()
@@ -30,16 +29,28 @@ namespace Peer2Peer.Nodes
                 if (hasher.Compare(input))
                 {
                     stopwatch.Stop();
-                    Console.WriteLine($"WorkerNode {nodeId} found the correct input: {input}");
-                    SendMessage(new PasswordFoundMessage(this, input), coordinator);
+                    Console.WriteLine($"WorkerNode {NodeId} found the correct input: {input}");
+                    foreach (Node node in nodes)
+                    {
+                        if (node.NodeId != NodeId)
+                        {
+                            SendMessage(new PasswordFoundMessage(this, input), node);
+                        }
+                    }
                     return;
                 }
             }
             stopwatch.Stop();
-            Console.WriteLine($"WorkerNode {nodeId} completed work chunk in {stopwatch.ElapsedMilliseconds} ms");
-            WorkCompleted(chunk, nodeId);
-            SendMessage(new WorkCompletedMessage(this, JsonSerializer.Serialize(chunk)), coordinator); //Should broadcast to all nodes
-            SendMessage(new RequestWorkMessage(this, ""), coordinator);
+            Console.WriteLine($"WorkerNode {NodeId} completed work chunk in {stopwatch.ElapsedMilliseconds} ms");
+            WorkCompleted(chunk, NodeId);
+            foreach (Node node in nodes)
+            {
+                if (node.NodeId != NodeId)
+                {
+                    SendMessage(new WorkCompletedMessage(this, JsonSerializer.Serialize(chunk)), node);
+                }
+            }
+            //SendMessage(new RequestWorkMessage(this, ""), coordinator);
             return;
         }
     }
