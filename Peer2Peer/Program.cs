@@ -17,29 +17,25 @@ class Program
     {
         string targetHash = "e0d0a8a9779f75750c64a45bb350ea59"; //Abcde
         var charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".ToCharArray();
-        Console.WriteLine("Enter 'c' to start as Coordinator or 'w' to start as Worker:");
+
+        Console.WriteLine("Enter node ip to connect, or leave empty to start as a single node:");
         var input = Console.ReadLine();
         var ip = GetLocalIPAddress();
 
-        if (input.ToLower() == "c")
+        WorkerNode worker = new WorkerNode(new Hasher(targetHash, HashAlgorithmType.MD5), ip, charset);
+
+
+        if (!string.IsNullOrEmpty(input))
         {
-            var coordinator = new CoordinatorNode(5000000, charset, ip);
-            Console.WriteLine($"Coordinator IP: {ip}:{coordinator.ListeningPort}");
-            PeerConnection peerConnection = new PeerConnection(coordinator);
-            peerConnection.startConnection();
+            Console.WriteLine("Enter target port:");
+            var port = int.Parse(Console.ReadLine() ?? "0");
+            worker.Connect(input, port);
         }
-        else if (input.ToLower() == "w")
-        {
-            Console.WriteLine("Enter the IP address of another node:");
-            var coordinatorAddress = Console.ReadLine();
-            Console.WriteLine("Enter the port of another node:");
-            var coordinatorPort = int.Parse(Console.ReadLine());
-            var worker = new WorkerNode(new Hasher(targetHash, HashAlgorithmType.MD5), ip);
-            Console.WriteLine($"Worker IP: {ip}:{worker.ListeningPort}");
-            PeerConnection peerConnection = new PeerConnection(worker);
-            peerConnection.startConnection();
-            worker.Connect(coordinatorAddress, coordinatorPort);
-        }
+
+        Console.WriteLine($"Node ip: {ip}:{worker.ListeningPort}");
+
+        worker.Start();
+
 
         Console.WriteLine("Press Enter to exit...");
         Console.ReadLine();

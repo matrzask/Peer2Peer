@@ -2,16 +2,16 @@ using Peer2Peer.Nodes;
 
 namespace Peer2Peer.Messages
 {
-    public class WorkCompletedMessage : Message
+    public class ClaimChunkMessage : Message
     {
-        public WorkCompletedMessage(Node sender, string payload) : base(sender, payload)
+        public ClaimChunkMessage(Node sender, string payload) : base(sender, payload)
         {
         }
         public override void Execute(Node node)
         {
             if (node is WorkerNode worker)
             {
-                worker.WorkCompleted(Payload);
+                worker.HandleChunkClaim(Payload, Sender);
             }
         }
     }

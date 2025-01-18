@@ -1,6 +1,4 @@
-using System.Numerics;
 using System.Text.Json;
-using Peer2Peer.Helpers;
 using Peer2Peer.Messages;
 using Peer2Peer.Network;
 
@@ -8,32 +6,28 @@ namespace Peer2Peer.Nodes
 {
     public class Node
     {
-        public string NodeId { get; set; }
+        public string? NodeId { get; set; }
         public int ListeningPort { get; set; }
         public string Ip { get; set; }
         protected List<Node> nodes = new List<Node>();
-        protected Node? coordinator;
-        private readonly HashSet<string> _completedChunks = new HashSet<string>();
-        TCPSender sender = new TCPSender();
+        protected readonly HashSet<string> _completedChunks = new HashSet<string>();
+        protected readonly object _ChunksLock = new object();
+
+
+        protected PeerConnection peerConnection;
+
 
         public Node() { }
 
         protected void SendMessage(Message message, Node node)
         {
-            sender.SendMessage(node, message);
-        }
-
-        public virtual void WorkCompleted(WorkChunk chunk, string workerId)
-        {
-            string chunkString = chunk.Length + ":" + chunk.Start;
-            _completedChunks.Add(chunkString);
-
+            peerConnection.SendMessageToNode(node, message);
         }
 
         public void SendNodeRegistry(Node node)
         {
-            sender.SendMessage(node, new NodeRegistryMessage(this, JsonSerializer.Serialize(nodes)));
-            sender.SendMessage(node, new SetCoordinatorMessage(this, JsonSerializer.Serialize(coordinator)));
+            SendMessage(new NodeRegistryMessage(this, JsonSerializer.Serialize(nodes)), node);
+            SendMessage(new CompletedChunksMessage(this, JsonSerializer.Serialize(_completedChunks)), node);
         }
 
         public void SetNodeRegistry(List<Node> nodes)
@@ -44,15 +38,9 @@ namespace Peer2Peer.Nodes
             {
                 if (node.NodeId != NodeId)
                 {
-                    sender.SendMessage(node, new NewNodeMessage(this, ""));
+                    SendMessage(new NewNodeMessage(this, ""), node);
                 }
             }
-        }
-
-        public void SetCoordinator(Node coordinator)
-        {
-            Console.WriteLine($"Node {NodeId} received new coordinator: {coordinator.NodeId}");
-            this.coordinator = coordinator;
         }
 
         public void AddNode(Node node)
@@ -62,7 +50,15 @@ namespace Peer2Peer.Nodes
 
         public void Connect(string ip, int port)
         {
-            sender.SendMessage(new Node { Ip = ip, ListeningPort = port }, new ConnectMessage(this, ""));
+            SendMessage(new ConnectMessage(this, ""), new Node { Ip = ip, ListeningPort = port });
+        }
+
+        public void SetCompletedChunks(List<string> completedChunks)
+        {
+            lock (_ChunksLock)
+            {
+                _completedChunks.UnionWith(completedChunks);
+            }
         }
     }
 }
