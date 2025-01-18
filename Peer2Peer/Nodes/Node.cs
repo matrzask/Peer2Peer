@@ -1,3 +1,4 @@
+using System.Net.Sockets;
 using System.Text.Json;
 using Peer2Peer.Messages;
 using Peer2Peer.Network;
@@ -12,8 +13,7 @@ namespace Peer2Peer.Nodes
         protected List<Node> nodes = new List<Node>();
         protected readonly HashSet<string> _completedChunks = new HashSet<string>();
         protected readonly object _ChunksLock = new object();
-
-
+        protected readonly object _NodesLock = new object();
         protected PeerConnection peerConnection;
 
 
@@ -21,7 +21,18 @@ namespace Peer2Peer.Nodes
 
         protected void SendMessage(Message message, Node node)
         {
-            peerConnection.SendMessageToNode(node, message);
+            try
+            {
+
+                peerConnection.SendMessageToNode(node, message);
+            }
+            catch (SocketException)
+            {
+                lock (_NodesLock)
+                {
+                    nodes.Remove(node);
+                }
+            }
         }
 
         public void SendNodeRegistry(Node node)
@@ -32,9 +43,14 @@ namespace Peer2Peer.Nodes
 
         public void SetNodeRegistry(List<Node> nodes)
         {
-            this.nodes = nodes;
-            nodes.Add(this);
-            foreach (Node node in nodes)
+            List<Node> nodesCopy;
+            lock (_NodesLock)
+            {
+                this.nodes = nodes;
+                nodes.Add(this);
+                nodesCopy = new List<Node>(nodes);
+            }
+            foreach (Node node in nodesCopy)
             {
                 if (node.NodeId != NodeId)
                 {
@@ -45,7 +61,10 @@ namespace Peer2Peer.Nodes
 
         public void AddNode(Node node)
         {
-            nodes.Add(node);
+            lock (_NodesLock)
+            {
+                nodes.Add(node);
+            }
         }
 
         public void Connect(string ip, int port)

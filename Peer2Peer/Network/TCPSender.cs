@@ -28,6 +28,11 @@ namespace Peer2Peer.Network
                     Console.WriteLine($"{message.Type} sent to {node.Ip}:{node.ListeningPort}");
                 }
             }
+            catch (SocketException ex)
+            {
+                Console.WriteLine($"Error sending {message.Type}: {ex.Message}");
+                throw;
+            }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error sending {message.Type}: {ex.Message}");
