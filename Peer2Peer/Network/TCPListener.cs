@@ -87,5 +87,17 @@ namespace Peer2Peer.Network
                 client.Close();
             }
         }
+
+        public static bool IsPortAvailable(int port) {
+            try {
+                TcpListener listener = new TcpListener(IPAddress.Loopback, port);
+                listener.Start();
+                listener.Stop();
+                return true;
+            }
+            catch (SocketException) {
+            return false;
+            }
+        }
     }
 }
