@@ -1,5 +1,3 @@
-using System.Security.Cryptography;
-using System.Text;
 using Peer2Peer.Password;
 
 namespace Peer2Peer.Helpers
@@ -29,6 +27,15 @@ namespace Peer2Peer.Helpers
             Start = start;
             End = end;
             Length = passwordLength;
+            CharacterSet = characterSet;
+        }
+
+        public WorkChunk(string ChunkString, char[] characterSet)
+        {
+            string[] parts = ChunkString.Split(':');
+            Start = long.Parse(parts[0]);
+            End = long.Parse(parts[1]);
+            Length = int.Parse(parts[2]);
             CharacterSet = characterSet;
         }
 
@@ -77,12 +84,7 @@ namespace Peer2Peer.Helpers
 
         public string Hash()
         {
-            using (SHA256 sha256 = SHA256.Create())
-            {
-                string input = $"{Start}:{End}:{Length}";
-                byte[] hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(input));
-                return BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant();
-            }
+            return $"{Start}:{End}:{Length}";
         }
     }
 }
