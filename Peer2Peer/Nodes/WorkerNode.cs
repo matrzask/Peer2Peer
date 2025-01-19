@@ -172,6 +172,8 @@ namespace Peer2Peer.Nodes
                 {
                     if (!_assignedChunks.ContainsKey(chunkHash))
                         _assignedChunks.Add(chunkHash, sender);
+                    else
+                        _assignedChunks[chunkHash] = sender;
                 }
             }
             else
