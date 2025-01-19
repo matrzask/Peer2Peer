@@ -21,7 +21,7 @@ namespace Peer2Peer.Nodes
 
         public Node() { }
 
-        protected void SendMessage(Message message, Node node)
+        protected virtual void SendMessage(Message message, Node node)
         {
             try
             {
