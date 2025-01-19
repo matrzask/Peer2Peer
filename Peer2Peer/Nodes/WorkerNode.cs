@@ -1,7 +1,7 @@
+using System.Net.Sockets;
 using Peer2Peer.Helpers;
 using Peer2Peer.Messages;
 using Peer2Peer.Network;
-using Peer2Peer.Password;
 namespace Peer2Peer.Nodes
 {
     class WorkerNode : Node
@@ -176,10 +176,17 @@ namespace Peer2Peer.Nodes
                 {
                     if (!_assignedChunks.ContainsKey(chunkHash))
                         _assignedChunks.Add(chunkHash, sender);
+                    else
+                        _assignedChunks[chunkHash] = sender;
                 }
             }
             else
             {
+                lock (_ChunksLock)
+                {
+                    if (_assignedChunks.ContainsKey(chunkHash))
+                        _assignedChunks[chunkHash] = sender;
+                }
                 interrupt = true;
             }
         }
@@ -197,6 +204,31 @@ namespace Peer2Peer.Nodes
             {
                 _completedChunks.Add(chunkHash);
                 _assignedChunks.Remove(chunkHash);
+            }
+        }
+
+        protected override void SendMessage(Message message, Node node)
+        {
+            try
+            {
+                peerConnection.SendMessageToNode(node, message);
+            }
+            catch (SocketException)
+            {
+                lock (_NodesLock)
+                {
+                    nodes.Remove(node);
+                }
+                lock (_ChunksLock)
+                {
+                    var chunkString = _assignedChunks.FirstOrDefault(x => x.Value.NodeId == node.NodeId).Key;
+                    if (chunkString != null)
+                    {
+                        _workChunks.Enqueue(new WorkChunk(chunkString, _charset));
+                        _assignedChunks.Remove(chunkString);
+                        Console.WriteLine($"Reassigned chunk {chunkString}");
+                    }
+                }
             }
         }
     }
