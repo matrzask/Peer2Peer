@@ -17,14 +17,10 @@ namespace Peer2Peer.Nodes
         private volatile bool interrupt = false;
 
 
-        public WorkerNode(string ip, char[] charset, int chunkSize = 10000000, int minPasswordLength = 1, int maxPasswordLength = 20)
+        public WorkerNode(string ip, int port, char[] charset, int chunkSize = 10000000, int minPasswordLength = 1, int maxPasswordLength = 20)
         {
             NodeId = Guid.NewGuid().ToString();
-            ListeningPort = 5000;
-            while (!TCPListener.IsPortAvailable(ListeningPort))
-            {
-                ListeningPort++;
-            }
+            ListeningPort = port;
             Ip = ip;
             nodes.Add(this);
             _charset = charset;

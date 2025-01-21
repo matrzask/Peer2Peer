@@ -1,10 +1,8 @@
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using System.Net;
 using System.Net.Sockets;
 using Peer2Peer.Helpers;
 using Peer2Peer.Nodes;
+using Peer2Peer.Network;
 
 class Program
 {
@@ -13,7 +11,7 @@ class Program
         var builder = WebApplication.CreateBuilder(args);
 
         int webAppPort = 5000;
-        while (!IsPortAvailable(webAppPort))
+        while (!TCPListener.IsPortAvailable(webAppPort))
         {
             webAppPort++;
         }
@@ -44,7 +42,7 @@ class Program
             var input = Console.ReadLine();
             var ip = GetLocalIPAddress();
 
-            WorkerNode worker = new WorkerNode(ip, charset);
+            WorkerNode worker = new WorkerNode(ip, webAppPort + 100, charset);
 
             if (!string.IsNullOrEmpty(input))
             {
@@ -64,9 +62,6 @@ class Program
         });
 
         app.Run();
-
-        Console.WriteLine("Press Enter to exit...");
-        Console.ReadLine();
     }
     public static string GetLocalIPAddress()
     {
@@ -79,20 +74,5 @@ class Program
             }
         }
         throw new Exception("No network adapters with an IPv4 address in the system!");
-    }
-
-    static bool IsPortAvailable(int port)
-    {
-        try
-        {
-            TcpListener listener = new TcpListener(IPAddress.Loopback, port);
-            listener.Start();
-            listener.Stop();
-            return true;
-        }
-        catch (SocketException)
-        {
-            return false;
-        }
     }
 }
