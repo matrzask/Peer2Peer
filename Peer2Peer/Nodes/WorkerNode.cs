@@ -20,7 +20,11 @@ namespace Peer2Peer.Nodes
         public WorkerNode(string ip, char[] charset, int chunkSize = 10000000, int minPasswordLength = 1, int maxPasswordLength = 20)
         {
             NodeId = Guid.NewGuid().ToString();
-            ListeningPort = new Random().Next(5001, 6000);
+            ListeningPort = 5000;
+            while (!TCPListener.IsPortAvailable(ListeningPort))
+            {
+                ListeningPort++;
+            }
             Ip = ip;
             nodes.Add(this);
             _charset = charset;
